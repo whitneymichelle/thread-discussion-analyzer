@@ -12,6 +12,10 @@ def answer_question_with_retrieval(question: str, user_id: str = "demo_user", li
     4. Include user feedback preferences as optional personalization context.
     """
     retrieved = semantic_search_comments(question, limit=limit)
+
+    if not retrieved:
+        return "No embedded comments found yet. Run option 6 first."
+
     likes = get_positive_preferences(user_id)
     dislikes = get_negative_preferences(user_id)
 

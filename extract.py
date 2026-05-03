@@ -47,7 +47,7 @@ Comment:
         parsed = json.loads(text)
         return parsed if isinstance(parsed, list) else []
     except json.JSONDecodeError:
-        return []
+        raise ValueError(f"OpenAI returned invalid JSON: {text[:500]}")
 
 
 def process_unextracted_comments(limit: int = 25):
@@ -61,6 +61,8 @@ def process_unextracted_comments(limit: int = 25):
         SELECT c.id, c.body
         FROM comments c
         WHERE c.extracted_at IS NULL
+          AND c.body IS NOT NULL
+          AND TRIM(c.body) != ''
         LIMIT ?
     """, (limit,))
 

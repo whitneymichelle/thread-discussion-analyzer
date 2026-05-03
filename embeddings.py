@@ -34,6 +34,8 @@ def embed_unembedded_comments(limit: int = 50):
         FROM comments c
         LEFT JOIN comment_embeddings e ON c.id = e.comment_id
         WHERE e.id IS NULL
+          AND c.body IS NOT NULL
+          AND TRIM(c.body) != ''
         LIMIT ?
     """, (limit,))
 
