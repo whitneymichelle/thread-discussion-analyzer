@@ -1,8 +1,7 @@
 # File Guide
 
 - db.py: Creates SQLite tables.
-- reddit_client.py: Creates Reddit API client.
-- ingest_thread.py: Pulls Reddit comments into SQLite.
+- process_reddit.py: Loads saved Reddit JSON files into SQLite.
 - extract.py: Uses an LLM to create structured mentions.
 - query.py: Uses SQL to answer structured questions.
 - embeddings.py: Creates embeddings and performs semantic search.

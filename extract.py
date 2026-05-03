@@ -1,12 +1,6 @@
 import json
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
 from db import get_connection, init_db
-
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from client_helper import get_openai_client
 
 
 def extract_mentions_from_comment(comment_body: str) -> list[dict]:
@@ -40,6 +34,8 @@ Comment:
 {comment_body}
 """
 
+    client = get_openai_client()
+
     response = client.responses.create(
         model="gpt-5.5-mini",
         input=prompt,
@@ -64,8 +60,7 @@ def process_unextracted_comments(limit: int = 25):
     cur.execute("""
         SELECT c.id, c.body
         FROM comments c
-        LEFT JOIN mentions m ON c.id = m.comment_id
-        WHERE m.id IS NULL
+        WHERE c.extracted_at IS NULL
         LIMIT ?
     """, (limit,))
 
@@ -95,6 +90,11 @@ def process_unextracted_comments(limit: int = 25):
             ))
 
             inserted += 1
+
+        cur.execute(
+            "UPDATE comments SET extracted_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (comment_id,),
+        )
 
     conn.commit()
     conn.close()

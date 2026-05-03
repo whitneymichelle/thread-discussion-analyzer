@@ -1,13 +1,6 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from embeddings import semantic_search_comments
 from feedback import get_positive_preferences, get_negative_preferences
-
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from client_helper import get_openai_client
 
 
 def answer_question_with_retrieval(question: str, user_id: str = "demo_user", limit: int = 6) -> str:
@@ -56,6 +49,8 @@ Retrieved Reddit comments:
 
 Answer:
 """
+
+    client = get_openai_client()
 
     response = client.responses.create(
         model="gpt-5.5-mini",

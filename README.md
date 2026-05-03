@@ -5,7 +5,7 @@ A learning-focused side project for building a small RAG-style agent over Reddit
 ## What this project does
 
 This app can:
-1. Ingest a Reddit thread
+1. Process saved Reddit JSON files
 2. Store comments in SQLite
 3. Extract structured mentions from comments using an LLM
 4. Create embeddings for semantic search
@@ -16,7 +16,7 @@ This app can:
 
 ## Mental model
 
-Reddit thread -> SQLite comments -> extraction -> mentions table -> embeddings -> semantic search -> RAG answer -> feedback
+Saved Reddit JSON -> SQLite comments -> extraction -> mentions table -> embeddings -> semantic search -> RAG answer -> feedback
 
 ## Setup
 
@@ -24,7 +24,7 @@ Reddit thread -> SQLite comments -> extraction -> mentions table -> embeddings -
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 python db.py
+python process_reddit.py
 python app.py
 ```

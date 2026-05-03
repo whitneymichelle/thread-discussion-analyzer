@@ -1,21 +1,16 @@
 import json
-import os
 from typing import List, Tuple
 
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from db import get_connection, init_db
-
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from client_helper import get_openai_client
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 def create_embedding(text: str) -> List[float]:
     """Turn text into a vector embedding."""
+    client = get_openai_client()
+
     response = client.embeddings.create(
         model=EMBEDDING_MODEL,
         input=text

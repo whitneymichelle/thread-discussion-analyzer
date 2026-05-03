@@ -1,5 +1,5 @@
 from db import init_db
-from ingest_thread import ingest_thread
+from process_reddit import main as process_reddit_files
 from extract import process_unextracted_comments
 from embeddings import embed_unembedded_comments, semantic_search_comments
 from query import get_top_books, get_top_topics, get_reasons_for_book
@@ -17,7 +17,7 @@ def main():
 
     while True:
         print("\\nReddit Thread Intelligence Agent")
-        print("1. Ingest Reddit thread")
+        print("1. Process raw Reddit JSON files")
         print("2. Extract mentions from comments")
         print("3. Show top books")
         print("4. Show top topics")
@@ -33,24 +33,36 @@ def main():
         choice = input("Choose an option: ").strip()
 
         if choice == "1":
-            url = input("Reddit thread URL: ").strip()
-            ingest_thread(url)
+            process_reddit_files()
 
         elif choice == "2":
             limit = input("How many comments? Default 25: ").strip()
             process_unextracted_comments(int(limit) if limit else 25)
 
         elif choice == "3":
-            for entity_name, mention_count, avg_score in get_top_books():
+            rows = get_top_books()
+
+            if not rows:
+                print("No book mentions found yet. Run option 2 first.")
+
+            for entity_name, mention_count, avg_score in rows:
                 print(f"{entity_name}: {mention_count} mentions, avg score {avg_score:.1f}")
 
         elif choice == "4":
-            for entity_name, mention_count in get_top_topics():
+            rows = get_top_topics()
+
+            if not rows:
+                print("No topic mentions found yet. Run option 2 first.")
+
+            for entity_name, mention_count in rows:
                 print(f"{entity_name}: {mention_count} mentions")
 
         elif choice == "5":
             book = input("Book name: ").strip()
             reasons = get_reasons_for_book(book)
+
+            if not reasons:
+                print("No mentions found for that book.")
 
             for reason, comment, score in reasons:
                 print("\\n---")
@@ -65,6 +77,9 @@ def main():
         elif choice == "7":
             query = input("Search by meaning: ").strip()
             results = semantic_search_comments(query)
+
+            if not results:
+                print("No embedded comments found yet. Run option 6 first.")
 
             for similarity, body, score in results:
                 print("\\n---")
@@ -126,11 +141,17 @@ def main():
             user_id = input("User ID default demo_user: ").strip() or "demo_user"
             rows = get_feedback_summary(user_id)
 
+            if not rows:
+                print("No feedback found for that user.")
+
             for feedback_type, entity_name, note, created_at in rows:
                 print(f"{created_at} | {feedback_type} | {entity_name} | {note}")
 
         elif choice == "11":
             rows = get_recent_answer_feedback()
+
+            if not rows:
+                print("No answer feedback found yet.")
 
             for question, answer, feedback_type, note, created_at in rows:
                 print("\\n---")

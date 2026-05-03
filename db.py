@@ -80,6 +80,7 @@ def init_db():
         depth INTEGER,
         subreddit TEXT,
         permalink TEXT,
+        extracted_at TEXT,
         FOREIGN KEY (thread_id) REFERENCES threads(id)
     );
 
@@ -120,6 +121,11 @@ def init_db():
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     """)
+
+    comment_columns = table_columns(cur, "comments")
+
+    if "extracted_at" not in comment_columns:
+        cur.execute("ALTER TABLE comments ADD COLUMN extracted_at TEXT")
 
     existing_tables = {
         row[0]
