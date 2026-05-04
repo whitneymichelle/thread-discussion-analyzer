@@ -1,4 +1,4 @@
-# Reddit Thread Intelligence Agent
+# Thread Intelligence Agent
 
 A learning-focused side project for building a small RAG-style agent over Reddit threads.
 
