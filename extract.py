@@ -3,6 +3,31 @@ from db import get_connection, init_db
 from client_helper import get_openai_client
 
 
+TOPIC_ALIASES = {
+    "fanfic": "fanfiction",
+    "fan fiction": "fanfiction",
+    "fan-fiction": "fanfiction",
+    "fandom writing": "fanfiction",
+    "slash": "slash/MM fanfiction",
+    "slash fiction": "slash/MM fanfiction",
+    "slash fanfic": "slash/MM fanfiction",
+    "slash fanfiction": "slash/MM fanfiction",
+    "m/m fanfic": "slash/MM fanfiction",
+    "m/m fanfiction": "slash/MM fanfiction",
+    "mm fanfic": "slash/MM fanfiction",
+    "mm fanfiction": "slash/MM fanfiction",
+    "male/male fanfic": "slash/MM fanfiction",
+    "male/male fanfiction": "slash/MM fanfiction",
+    "male pairings": "slash/MM fanfiction",
+    "fanfic of male pairings": "slash/MM fanfiction",
+    "ship fic": "shipping",
+    "shipping fic": "shipping",
+    "character study": "characterization",
+    "character studies": "characterization",
+    "characterisation": "characterization",
+}
+
+
 def clean_json_response(text: str) -> str:
     """Remove Markdown code fences when the model wraps JSON in them."""
     text = text.strip()
@@ -19,6 +44,24 @@ def clean_json_response(text: str) -> str:
         text = "\n".join(lines).strip()
 
     return text
+
+
+def normalize_topic(topic: str) -> str:
+    """Normalize common fandom topic variants without erasing useful subtopics."""
+    normalized = " ".join(topic.strip().split())
+    alias_key = normalized.lower()
+    return TOPIC_ALIASES.get(alias_key, normalized)
+
+
+def normalize_mention(mention: dict) -> dict:
+    entity_type = mention.get("entity_type")
+
+    if isinstance(entity_type, str) and entity_type.lower() == "topic":
+        mention = mention.copy()
+        mention["entity_type"] = "topic"
+        mention["entity_name"] = normalize_topic(str(mention.get("entity_name", "")))
+
+    return mention
 
 
 def extract_mentions_from_comment(comment_body: str) -> list[dict]:
@@ -47,6 +90,11 @@ Rules:
 - If there are no useful mentions, return [].
 - Do not invent books, authors, or topics.
 - Keep reasons short.
+- Normalize topics, but preserve meaningful fandom subcategories.
+- Use "fanfiction" for general fanfic, fan fiction, or fandom writing.
+- Use "slash/MM fanfiction" for slash fiction, M/M fanfic, male/male fanfic, or male pairings.
+- Use "shipping" for ship fic or shipping.
+- Use "characterization" for character study, characterization, or characterisation.
 
 Comment:
 {comment_body}
@@ -63,7 +111,7 @@ Comment:
 
     try:
         parsed = json.loads(text)
-        return parsed if isinstance(parsed, list) else []
+        return [normalize_mention(mention) for mention in parsed] if isinstance(parsed, list) else []
     except json.JSONDecodeError:
         raise ValueError(f"OpenAI returned invalid JSON: {text[:500]}")
 
