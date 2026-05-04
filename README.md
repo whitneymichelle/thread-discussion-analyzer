@@ -28,3 +28,18 @@ python db.py
 python process_reddit.py
 python app.py
 ```
+
+## Roadmap
+
+Near-term direction:
+
+- Add a simple chat interface over the Reddit data.
+- Combine setup steps so processing, extraction, and embeddings can run automatically when needed.
+- Add thumbs up/down answer feedback.
+- Surface top books and top topics in a sidebar.
+- Separate answer feedback from user preference feedback.
+
+Longer-term ideas:
+
+- Save which Reddit comments were used to create each chat answer, so answers can be audited, sourced, and improved from feedback.
+- Use feedback to improve retrieval and personalization.
