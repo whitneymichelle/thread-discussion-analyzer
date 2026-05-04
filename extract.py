@@ -3,6 +3,24 @@ from db import get_connection, init_db
 from client_helper import get_openai_client
 
 
+def clean_json_response(text: str) -> str:
+    """Remove Markdown code fences when the model wraps JSON in them."""
+    text = text.strip()
+
+    if text.startswith("```"):
+        lines = text.splitlines()
+
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+
+        text = "\n".join(lines).strip()
+
+    return text
+
+
 def extract_mentions_from_comment(comment_body: str) -> list[dict]:
     """
     Use an LLM to convert one Reddit comment into structured mentions.
@@ -37,11 +55,11 @@ Comment:
     client = get_openai_client()
 
     response = client.responses.create(
-        model="gpt-5.5-mini",
+        model="gpt-4.1-mini",
         input=prompt,
     )
 
-    text = response.output_text.strip()
+    text = clean_json_response(response.output_text)
 
     try:
         parsed = json.loads(text)

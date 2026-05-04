@@ -57,7 +57,7 @@ Answer:
     client = get_openai_client()
 
     response = client.responses.create(
-        model="gpt-5.5-mini",
+        model="gpt-4.1-mini",
         input=prompt,
     )
 
